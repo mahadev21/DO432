@@ -1,0 +1,14 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  generation: 1
+  name: production-scan-placement
+  namespace: policies-troubleshoot
+placementRef:
+  apiGroup: cluster.open-cluster-management.io
+  kind: Placement
+  name: production-scan-placement
+subjects:
+- apiGroup: policy.open-cluster-management.io
+  kind: Policy
+  name: production-scan

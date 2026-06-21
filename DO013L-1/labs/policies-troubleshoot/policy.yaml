@@ -1,0 +1,82 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  annotations:
+    policy.open-cluster-management.io/categories: CM Configuration Management
+    policy.open-cluster-management.io/controls: CM-6 Configuration Settings
+    policy.open-cluster-management.io/description: Scan for clusters in the production-clusters
+      cluster set.
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+  creationTimestamp: "2025-06-24T02:55:53Z"
+  generation: 1
+  name: production-scan
+  namespace: policies-troubleshoot
+  resourceVersion: "380771"
+  uid: d23f1f79-6c1e-4b22-bcce-1dde0d6b1730
+spec:
+  disabled: false
+  policy-templates:
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: compliance-cis-scan
+      spec:
+        object-templates:
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: compliance.openshift.io/v1alpha1
+            kind: ScanSettingBinding
+            metadata:
+              name: cis
+              namespace: openshift-compliance
+            profiles:
+            - apiGroup: compliance.openshift.io/v1alpha1
+              kind: Profile
+              name: ocp4-cis
+            - apiGroup: compliance.openshift.io/v1alpha1
+              kind: Profile
+              name: ocp4-cis-node
+            settingsRef:
+              apiGroup: compliance.openshift.io/v1alpha1
+              kind: ScanSetting
+              name: default
+        remediationAction: inform
+        severity: high
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: compliance-suite-cis
+      spec:
+        object-templates:
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: compliance.openshift.io/v1alpha1
+            kind: ComplianceSuite
+            metadata:
+              name: cis
+              namespace: openshift-compliance
+            status:
+              phase: DONE
+        remediationAction: inform
+        severity: high
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: compliance-suite-cis-results
+      spec:
+        object-templates:
+        - complianceType: mustnothave
+          objectDefinition:
+            apiVersion: compliance.openshift.io/v1alpha1
+            kind: ComplianceCheckResult
+            metadata:
+              labels:
+                compliance.openshift.io/check-status: FAIL
+                compliance.openshift.io/suite: cis
+              namespace: openshift-compliance
+        remediationAction: inform
+        severity: high
+  remediationAction: inform
