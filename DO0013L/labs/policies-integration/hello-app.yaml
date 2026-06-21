@@ -1,0 +1,62 @@
+apiVersion: project.openshift.io/v1
+kind: Project
+metadata:
+  name: app-test
+spec: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-app
+  labels:
+    app: hello-app
+    name: hello-app
+  namespace: app-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-app
+      name: hello-app
+  template:
+    metadata:
+      labels:
+        app: hello-app
+        name: hello-app
+    spec:
+      containers:
+      - name: hello-app
+        image: registry.ocp4.example.com:8443/redhattraining/hello-app:latest
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: hello-app
+    name: hello-app
+  name: hello-app
+  namespace: app-test
+spec:
+  ports:
+  - port: 8080
+  selector:
+    name: hello-app
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: hello-app
+  labels:
+    app: hello-app
+    name: hello-app
+  namespace: app-test
+spec:
+  host: hello-app.apps.ocp4.example.com
+  subdomain: ''
+  to:
+    kind: Service
+    name: hello-app
+    weight: 100
+  port:
+    targetPort: 8080
+  wildcardPolicy: None
