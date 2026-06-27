@@ -1,0 +1,23 @@
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PolicyGenerator
+metadata:
+  name: gitops-policy-generator
+policyDefaults:
+  namespace: gitops-configure
+  orderManifests: true
+  consolidateManifests: false
+  remediationAction: enforce
+  placement:
+    name: gitops-configure
+    labelSelector:
+      vendor: OpenShift
+placementBindingDefaults:
+  name: gitops-configure
+policies:
+  - name: gitops-configure
+    manifests:
+      - path: gitops-operator.yaml
+      - path: cluster-role-binding.yaml
+      - path: ca-bundle.yaml
+      - path: argocd-configuration.yaml
