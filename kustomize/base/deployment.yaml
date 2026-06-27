@@ -3,20 +3,20 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: todo-app
-  name: todo-app
+    app: task-list
+  name: task-list
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: todo-app
+      app: task-list
   template:
     metadata:
       labels:
-        app: todo-app
+        app: task-list
     spec:
       containers:
-        - name: todo-app
+        - name: task-list
           image: registry.ocp4.example.com:8443/redhattraining/todo-angular:v1.1
           resources:
             requests:
