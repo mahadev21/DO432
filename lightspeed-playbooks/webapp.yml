@@ -1,0 +1,46 @@
+---
+- name: Sync nginx.conf
+  hosts: webapp
+  become: true
+  vars:
+    web: nginx
+    app: php-fpm
+    firewall: firewalld
+    firewall_service: http
+    conf_files: files/
+  tasks:
+    - name: Install nginx, firewalld, and php-fpm
+      ansible.builtin.package:
+        name:
+          - "{{ web }}"
+          - "{{ firewall }}"
+          - "{{ app }}"
+        state: present
+    - name: Allow firewall for http
+      ansible.posix.firewalld:
+        service: "{{ firewall_service }}"
+        permanent: true
+        state: enabled
+    - name: Sync nginx.conf
+      ansible.builtin.copy:
+        src: "{{ conf_files }}/nginx.conf"
+        dest: /etc/nginx/nginx.conf
+      notify: Restart nginx  
+    - name: Sync www.conf
+      ansible.builtin.copy:
+        src: "{{ conf_files }}/www.conf"
+        dest: /etc/php-fpm.d/www.conf
+      notify: Restart php-fpm
+    - name: Sync index.php
+      ansible.builtin.copy:
+        src: "{{ conf_files }}/index.php"
+        dest: /usr/share/nginx/html/index.php
+    - name: Enable and start services
+      ansible.builtin.service:
+        name: "{{ item }}"
+        enabled: true
+        state: started
+      loop:
+        - nginx
+        - php-fpm
+        - firewalld

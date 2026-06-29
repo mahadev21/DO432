@@ -1,0 +1,63 @@
+---
+- name: Install MariaDB server software and start and enable the service
+  hosts: serverb.lab.example.com
+  become: true
+  tasks:
+    - name: Install MariaDB server software
+      ansible.builtin.package:
+        name: mariadb-server
+        state: present
+
+    - name: Start and enable MariaDB
+      ansible.builtin.service:
+        name: mariadb
+        state: started
+        enabled: true
+
+    - name: Create a rich rule to allow mysql access to 172.25.250.10
+      ansible.posix.firewalld:
+        rich_rule: >
+          rule family="ipv4" source address="172.25.250.10"
+          port port="3306" protocol="tcp" accept
+        permanent: true
+        immediate: true
+        state: enabled
+
+    - name: List the existing mysql databases
+      ansible.builtin.command: mysql -u root -e "show databases;"
+      register: mysql_databases
+      changed_when: false
+
+    - name: Create the usa_states database if it does not exist
+      ansible.builtin.command: mysql -u root -e "create database usa_states;"
+      when: mysql_databases.stdout.find('usa_states') == -1
+
+    - name: Copy files/usa_states.sql to /tmp with permissions of 0644
+      ansible.builtin.copy:
+        src: files/usa_states.sql
+        dest: /tmp/usa_states.sql
+        mode: '0644'
+
+    - name: Populate the usa_states database
+      ansible.builtin.command: mysql -u root -e "source /tmp/usa_states.sql;"
+      when: mysql_databases.stdout.find('usa_states') == -1
+
+    - name: List mysql users who have access from 172.25.250.10
+      ansible.builtin.command: >
+        mysql -u root -e "select user,host from mysql.user where
+        host='172.25.250.10' or host='localhost'
+        and user not in ('mysql.sys', 'mysqlxsys');"
+      register: mysql_users
+      changed_when: false
+
+    - name: Create the 'student'@'172.25.250.10' mysql user
+      ansible.builtin.command: >
+        mysql -u root -e "create user 'student'@'172.25.250.10'
+        identified by 'student';"
+      when: mysql_users.stdout.find('student') == -1
+
+    - name: Grant select permission to that user on the usa_states database
+      ansible.builtin.command: >
+        mysql -u root -e "grant select on usa_states.*
+        to 'student'@'172.25.250.10';"
+      when: mysql_users.stdout.find('student') == -1
