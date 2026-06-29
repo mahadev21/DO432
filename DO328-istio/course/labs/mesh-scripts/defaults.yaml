@@ -1,0 +1,49 @@
+# DO328 Traffic Generator - Global Defaults
+# All lab configs inherit from these defaults
+
+# CONNECTION DEFAULTS
+connection:
+  gateway:
+    namespace: "istio-ingress"
+    route_name: "istio-ingressgateway"
+    # Auto-discovered URL: http://istio-ingressgateway-istio-system.apps.cluster.com
+
+# TRAFFIC DEFAULTS
+traffic:
+  mode: "finite"              # continuous|finite|multi
+  count: 50                   # Default for finite mode
+  duration: 300               # Default for continuous mode (5 minutes)
+  sleep: 0.1                  # Seconds between requests
+  endpoint: "/"               # Default endpoint
+
+  # Headers
+  headers:
+    default: {}               # Base headers for all requests
+
+  # Options
+  options:
+    measure_timing: true      # Always measure response times
+    show_responses: false     # Don't spam output with responses
+    parallel_workers: 10      # For parallel execution within scenarios
+    timeout: 30               # Request timeout in seconds
+
+# ANALYSIS DEFAULTS
+analysis:
+  enabled: true
+  content_normalization: true  # Strip dynamic content (transaction IDs, etc.)
+  statistics:
+    - "success_rate"
+    - "timing_percentiles"
+    - "http_codes"
+    - "response_distribution"  # Only shown if expected_responses defined
+
+# DISPLAY DEFAULTS
+display:
+  show_progress: true
+  colored_output: true
+  quiet_mode: false
+  log_level: "INFO"           # DEBUG|INFO|WARN|ERROR
+  real_time_stats: false      # Show live updates during execution
+  response_view: "body"       # body|status|extract
+  extract_regex: null         # e.g. "\"color\":\"[^\"]+\""
+  extract_json_path: null     # e.g. .reviews[0].rating.color

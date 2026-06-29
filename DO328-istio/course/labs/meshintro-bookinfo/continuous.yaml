@@ -1,0 +1,17 @@
+traffic:
+  mode: "continuous"
+  endpoint: "/api/v1/products/1/reviews"
+  duration: 600       # 10 minutes
+  sleep: 0.1          # Slower pace for visualization
+
+display:
+  show_progress: true
+  quiet_mode: false
+  response_view: "extract"
+  extract_json_path: ".reviews[0].rating.color"
+
+analysis:
+  expected_responses: ["white", "red", "black"]
+  statistics:
+    - "success_rate"
+    - "response_distribution"

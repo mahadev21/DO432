@@ -1,0 +1,21 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  labels:
+    kiali_wizard: traffic_shifting
+  name: reviews
+spec:
+  hosts:
+  - reviews.meshintro-bookinfo.svc.cluster.local
+  http:
+  - route:
+    - destination:
+        host: reviews.meshintro-bookinfo.svc.cluster.local
+        subset: v1
+    - destination:
+        host: reviews.meshintro-bookinfo.svc.cluster.local
+        subset: v2
+    - destination:
+        host: reviews.meshintro-bookinfo.svc.cluster.local
+        subset: v3
+      weight: 100
